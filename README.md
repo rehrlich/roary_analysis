@@ -26,3 +26,7 @@ counts for the corresponding strains.
 * difference = present in exactly one of the strains (xor)
 * comparison = similarity - difference
 * pair unique = present in only those two stains
+
+# get_fsgm_input.py
+This program takes as input the folder with the output from roary and writes
+to standard out the input for cgs_supragenome.m which can be found at https://github.com/rehrlich/fsgm
