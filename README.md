@@ -30,3 +30,10 @@ counts for the corresponding strains.
 # get_fsgm_input.py
 This program takes as input the folder with the output from roary and writes
 to standard out the input for cgs_supragenome.m which can be found at https://github.com/rehrlich/fsgm
+
+# gene_counts_heat_map.r
+This program makes heat maps from Roary's output gene counts.  Command line inputs are the roary output folder, nickname for the run, and the output directory.
+
+Example usage:
+
+Rscript gene_counts_heat_map.r roary_dir nickname outdir
