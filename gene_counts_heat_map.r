@@ -1,7 +1,8 @@
 # Author:  Rachel Ehrlich
 # This program makes heat maps from Roary's output gene counts.
 # Command line inputs are the roary output folder, nickname for the run,
-# and the output directory
+# and the output directory.
+# Also writes a table of the duplicated genes
 # Example usage:
 # Rscript gene_counts_heat_map.r roary_dir nickname outdir
 
@@ -51,13 +52,10 @@ FilterCoreGenes <- function(df) {
   return(filtered)
 }
 
-# Input is the roary output directory
+# Input is the data from the roary output directory
 # Returns a data frame whose cols are strains, rows are genes and entries are
 # the copy number
 GetGeneDataCopies <- function(roary.output){
-  gene.data.full <- read.csv(paste(roary.output, "gene_presence_absence.csv",
-                                   sep="/"), row.names=1, stringsAsFactors=F)
-
   gene.data.poss <- gene.data.full[, 11:ncol(gene.data.full)]
   gene.data.copies <- as.data.frame(lapply(gene.data.poss,
                                            FUN=function(x)
@@ -75,13 +73,28 @@ MakeHeatMaps <- function(gene.counts, prefix){
   MakeGeneCountsHeatMap(gene.counts, prefix)
 }
 
+# inputs are the gene counts matrix, the full roary output data and the output
+# file name.
+# Writes a tab separated file with data for all duplicated genes
+MakeGeneDupsTable <- function(gene.data.copies, gene.data.full, out.file){
+  has.dup <- which(rowSums(gene.data.copies > 1) > 0)
+  dups <- gene.data.copies[has.dup, ]
+  full.dups <- cbind(gene.data.full[has.dup, 1:10], dups)
+  write.csv(out.file, full.dups, sep = "\t")
+}
+
 main <- function(){
   args <- commandArgs(TRUE)
   roary.output <- args[1]
   nickname <- args[2]
   outdir <- args[3]
 
-  gene.data.copies <- GetGeneDataCopies(roary.output)
+  gene.data.full <- read.csv(paste(roary.output, "gene_presence_absence.csv",
+                                   sep="/"), row.names=1, stringsAsFactors=F)
+  gene.data.copies <- GetGeneDataCopies(gene.data.full)
+
+  out.file <- paste(outdir, "/", nickname, "_duplicated_genes.csv", sep="")
+  MakeGeneDupsTable(gene.data.copies, gene.data.full, out.file)
 
   prefix <- paste(outdir, "/", nickname, "_heatmap_all_", sep="")
   MakeHeatMaps(gene.data.copies, prefix)
