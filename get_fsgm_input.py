@@ -23,7 +23,7 @@ def print_c_for_fsgm(gene_counts_dict, num_strains):
     ordered_gene_counts = []
     for i in range(1, num_strains + 1):
         ordered_gene_counts.append(gene_counts_dict[i])
-    sys.stdout.write("[" + ' '.join(map(str, ordered_gene_counts)) + "]")
+    sys.stdout.write(' '.join(map(str, ordered_gene_counts)))
                    
 def main():
     folder = sys.argv[1]
