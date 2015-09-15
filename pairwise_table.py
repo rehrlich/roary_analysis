@@ -1,9 +1,9 @@
 # Author:  Rachel Ehrlich
 # This program takes as input the folder with the output from roary, an output
-# folder and a nickname for the results.  It creates three files in the
+# folder and a nickname for the results.  It creates five files in the
 # output directory with the prefix the supplied nickname with the pairwise
 # tables and summary statistics.
-# In the two pairwise table files, each number in the matrix refers to the gene
+# In the pairwise table files, each number in the matrix refers to the gene
 # counts for the corresponding strains.
 # similarity = present in both strains (includes core)
 # difference = present in exactly one of the strains (xor)
@@ -120,18 +120,20 @@ def make_output(strain_pairs, col_headings, num_strains):
 def make_output_3(strain_pairs, col_headings, num_strains):
     row_labels = ['Similarity', 'Difference', 'Comparison', 'PairUnique']
     rev_col_headings = list(reversed(col_headings[1:]))
-    output = list()
+    outputs = []
     
     for i in [0, 1, 3]:
-        output.append("\n\n\n\n" + row_labels[i] + "\nStrain\t" + '\t'.join(rev_col_headings))
+        output = []
+        output.append("Strain\t" + '\t'.join(rev_col_headings))
         for row in xrange(num_strains - 1):
             curr = [col_headings[row]]
 
             for col in list(reversed(xrange(row + 1, num_strains))):
                 curr.append(strain_pairs[(row, col)][i])
             output.append('\t'.join(map(str, curr)))
+        outputs.append(('\n'.join(output), row_labels[i]))
 
-    return '\n'.join(output)
+    return outputs
 
 # Gets all data values for the output type specified by index
 # example:  returns all pairwise similarity counts
@@ -171,8 +173,9 @@ def main():
 
     text = make_output(strain_pairs, col_headings, num_strains)
     write_output(text, nickname + "_pairwise_table.txt")
-    text = make_output_3(strain_pairs, col_headings, num_strains)
-    write_output(text, nickname + "_pairwise_3_tables.txt")
+    single_tables = make_output_3(strain_pairs, col_headings, num_strains)
+    for (data, table_type) in single_tables:
+        write_output(data, nickname + "_pairwise_" + table_type + "_table.txt")
     text = calc_stats(strain_pairs) 
     write_output(text, nickname + "_pairwise_table_stats.txt")
 
