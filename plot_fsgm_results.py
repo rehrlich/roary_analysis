@@ -1,4 +1,8 @@
 # Author:  Rachel Ehrlich
+# This program takes as input an output directory (where it expects to find fsgm
+# output with the same nickname) and a nickname for the analysis.  It creates
+# two plots of the data, the likelihood of various N values and the number of
+# expected new genes per strain sequenced.
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
@@ -92,10 +96,10 @@ def plot_lik_vs_n(n, lik, out_file):
     return best_n
     
 def main():
-    fsgm_file = sys.argv[1]
-    out_dir = sys.argv[2]
-    nickname = sys.argv[3]
-    fsgm_lik_file = sys.argv[4]
+    out_dir = sys.argv[1]
+    nickname = sys.argv[2]
+    fsgm_lik_file = out_dir + "/N_vs_likelihood_" + nickname + ".txt"
+    fsgm_file = out_dir + "/CommandWindow_" + nickname + ".txt"
     
     n, lik = get_lik_data(fsgm_lik_file)
     out_file = out_dir + '/' + nickname + '_genes_in_pan_genome.pdf'
