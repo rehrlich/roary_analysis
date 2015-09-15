@@ -50,3 +50,9 @@ This program makes heat maps from Roary's output gene counts.  Command line inpu
 Example usage:
 
 Rscript gene_counts_heat_map.r roary_dir nickname outdir
+
+# plot_fsgm_results.py
+This program takes as input an output directory (where it expects to find fsgm
+output with the same nickname) and a nickname for the analysis.  It creates
+two plots of the data, the likelihood of various N values and the number of
+expected new genes per strain sequenced.
