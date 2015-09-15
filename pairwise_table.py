@@ -118,7 +118,7 @@ def make_output(strain_pairs, col_headings, num_strains):
 
 # Makes three tables for the similarity, difference and pair unique output
 def make_output_3(strain_pairs, col_headings, num_strains):
-    row_labels = ['Similarity', 'Difference', 'Comparison', 'PairUnique']
+    row_labels = ['similarity', 'difference', 'comparison', 'pair_unique']
     rev_col_headings = list(reversed(col_headings[1:]))
     outputs = []
     
