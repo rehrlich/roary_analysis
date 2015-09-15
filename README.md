@@ -1,4 +1,6 @@
 ## Scripts for analyzing the output of Roary which can be found at:  https://github.com/sanger-pathogens/Roary
+Suggested use:  run plot_blastp_comparison.py, look at the graph to choose blastp values of interest and then run analyze_blastp_raory.sh
+
 
 # plot_blastp_comparison.py
 
@@ -12,6 +14,17 @@ Example usage:
 python plot_blastp_comparison.py /home/rachel/Data/HFluGenomes/roary_output HFlu_blastP_plot
 
 The above command creates HFlu_blastP_plot.pdf in your current directory
+
+# analyze_blastp_raory.sh
+
+This program takes as input the folder with the fsgm .m files, the folder
+containing all the roary output, a nickname for the analysis, an output
+directory and the blastp roary folder of interest.
+This creates outdir containing output from gene_counts_heat_map.r,
+pairwise_table.py and the fsgm cgs_supragenome program
+This assumes the roary output is structured:  roary_output/blastp to allow
+for simple iteration over multiple folders.  If not, use the roary parent for
+the roary_output and the roary folder for blastp.
 
 # pairwise_table.py
 
