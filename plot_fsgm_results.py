@@ -1,6 +1,9 @@
+# Author:  Rachel Ehrlich
+
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import operator
+import sys
 
 # Input is a list of strings that are ints with possible white space
 # Returns a list of ints
@@ -89,12 +92,11 @@ def plot_lik_vs_n(n, lik, out_file):
     return best_n
     
 def main():
-
-    fsgm_file = "/home/rachel/Documents/Finite_supragenome_model/fsgm/CommandWindow_pg70.txt"
-    out_dir = "/home/rachel/Data/pg/roary_except_MB1843/results"
-    nickname = 'testing'
-
-    fsgm_lik_file = "/home/rachel/Documents/Finite_supragenome_model/fsgm/N_vs_likelihood_pg70.txt"
+    fsgm_file = sys.argv[1]
+    out_dir = sys.argv[2]
+    nickname = sys.argv[3]
+    fsgm_lik_file = sys.argv[4]
+    
     n, lik = get_lik_data(fsgm_lik_file)
     out_file = out_dir + '/' + nickname + '_genes_in_pan_genome.pdf'
     best_n = plot_lik_vs_n(n, lik, out_file)
@@ -103,7 +105,6 @@ def main():
     genes_per_genome = [strip_ints_list(x) for x in genes_per_genome]
     out_file = out_dir + '/' + nickname + '_new_genes_per_sequenced_genome.pdf'
     plot_genes_per_genome(genes_per_genome, out_file, best_n)
-    
 
 
 if __name__ == "__main__":
