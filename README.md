@@ -29,10 +29,10 @@ the roary_output and the roary folder for blastp.
 # pairwise_table.py
 
 This program takes as input the folder with the output from roary, an output
-folder and a nickname for the results.  It creates three files in the
+folder and a nickname for the results.  It creates five files in the
 output directory with the prefix the supplied nickname with the pairwise
 tables and summary statistics.
-In the two pairwise table files, each number in the matrix refers to the gene
+In the pairwise table files, each number in the matrix refers to the gene
 counts for the corresponding strains.
 
 * similarity = present in both strains (includes core)
