@@ -70,3 +70,10 @@ is the number of genes whose frequency in the first n strains sampled
 is next smallest cutoff <= freqnecy < cutoff.  For the case of the 
 lowest cutoff, the lower number is 0.  For the case of 1.0, the upper 
 range is <= to include 100%.
+
+# plot_rtab.py
+This program takes as input a folder with output from roary,
+an output directory that has the results from simulate_pan_genome.py
+and a nickname for the outputs.
+This makes two plots, one from the roary Rtab data and one from
+the simulated gene frequency data.
