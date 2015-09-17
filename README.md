@@ -56,3 +56,17 @@ This program takes as input an output directory (where it expects to find fsgm
 output with the same nickname) and a nickname for the analysis.  It creates
 two plots of the data, the likelihood of various N values and the number of
 expected new genes per strain sequenced.
+
+# simulate_pan_genome.py
+This program takes as input a folder with roary output, an output directory
+for the results, a nickname for the analysis, a comma separated string of 
+cutoff values where 0 < value <= 1 and the number of simulations to run.
+An example cutoff argument is "0.15,0.95,0.99,1.0"
+This does the specified number of simulations to model how the gene 
+frequencies change when strains are sequenced in a different order.
+For each of the cutoffs, a tab separated .Rtab (for consistency 
+with roary) has one line for each simulation.  The nth number in a line
+is the number of genes whose frequency in the first n strains sampled
+is next smallest cutoff <= freqnecy < cutoff.  For the case of the 
+lowest cutoff, the lower number is 0.  For the case of 1.0, the upper 
+range is <= to include 100%.
