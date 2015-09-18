@@ -4,7 +4,7 @@
 # to their blastP percentages.  The output file is a pdf which plots the
 # number of core, soft core, shell and cloud genes for each blastP value.
 # Example usage:
-# python plot_blastp_comparison.py /home/rachel/Data/HFluGenomes/roary_output HFlu_blastP_plot
+# python plot_blastp_comparison.py /home/rachel/Data/pg/roary_output cluster_freq_blastp
 # The above command creates HFlu_blastP_plot.pdf in your current directory
 
 
@@ -49,12 +49,13 @@ def get_all_summary_stats(roary_output_dir):
 # This plots the counts for each gene group vs the blastP percentage
 def plot_counts((core, soft, shell, cloud, blastp), plot_name):
     with PdfPages(plot_name + '.pdf') as pdf:
-        plt.plot(blastp, core, 'ro', label='core (99-100)')
-        plt.plot(blastp, soft, 'bs', label='soft core (95-99)')
-        plt.plot(blastp, shell, 'g^', label='shell (15-95)')
-        plt.plot(blastp, cloud, 'm<', label='cloud (0-15)')
-        plt.xlabel('BlastP %')
-        plt.ylabel('Number of genes')
+        plt.plot(blastp, core, 'ro', label='core (99-100% of strains)')
+        plt.plot(blastp, soft, 'bs', label='soft core (95-99% of strains)')
+        plt.plot(blastp, shell, 'g^', label='shell (15-95% of strains)')
+        plt.plot(blastp, cloud, 'm<', label='cloud (0-15% of strains)')
+        plt.xlabel('BlastP percent identity')
+        plt.ylabel('Number of clusters')
+        plt.title('Gene cluster frequency in sequenced strains')
         plt.legend(loc=0, numpoints=1)
         pdf.savefig()
         plt.close()  
