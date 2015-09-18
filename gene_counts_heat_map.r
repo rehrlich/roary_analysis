@@ -55,7 +55,7 @@ FilterCoreGenes <- function(df) {
 # Input is the data from the roary output directory
 # Returns a data frame whose cols are strains, rows are genes and entries are
 # the copy number
-GetGeneDataCopies <- function(roary.output){
+GetGeneDataCopies <- function(gene.data.full){
   gene.data.poss <- gene.data.full[, 11:ncol(gene.data.full)]
   gene.data.copies <- as.data.frame(lapply(gene.data.poss,
                                            FUN=function(x)
@@ -80,7 +80,17 @@ MakeGeneDupsTable <- function(gene.data.copies, gene.data.full, out.file){
   has.dup <- which(rowSums(gene.data.copies > 1) > 0)
   dups <- gene.data.copies[has.dup, ]
   full.dups <- cbind(gene.data.full[has.dup, 1:10], dups)
-  write.csv(out.file, full.dups, sep = "\t")
+  write.csv(file=out.file, x = full.dups)
+}
+
+# inputs are the gene counts matrix, the full roary output data and the output
+# file name.
+# Writes a tab separated file with data and counts for all genes
+MakeGeneCountsTable <- function(gene.data.copies, gene.data.full, out.file){
+  has.dup <- which(rowSums(gene.data.copies > 1) > 0)
+  dups <- gene.data.copies[has.dup, ]
+  full.dups <- cbind(gene.data.full[, 1:10], gene.data.copies)
+  write.csv(file=out.file, x = full.dups)
 }
 
 main <- function(){
@@ -95,6 +105,9 @@ main <- function(){
 
   out.file <- paste(outdir, "/", nickname, "_duplicated_genes.csv", sep="")
   MakeGeneDupsTable(gene.data.copies, gene.data.full, out.file)
+
+  out.file <- paste(outdir, "/", nickname, "_cluster_counts.csv", sep="")
+  MakeGeneCountsTable(gene.data.copies, gene.data.full, out.file)
 
   prefix <- paste(outdir, "/", nickname, "_heatmap_all_", sep="")
   MakeHeatMaps(gene.data.copies, prefix)
