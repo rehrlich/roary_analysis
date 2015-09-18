@@ -44,8 +44,8 @@ def make_plots((core, total, new_genes, unique), out_file):
                 plt.legend(loc=0)
                 
         plt.xlabel("Number of genomes")
-        plt.ylabel('Number of genes')
-        plt.title("Observed size of distributed genome per strain sequenced")
+        plt.ylabel('Number of clusters')
+        plt.title("Observed size of pan genome per strain sequenced")
         
         pdf.savefig()
         plt.close()
