@@ -28,10 +28,10 @@ GetCopyNumber <- function(cell) {
 MakeGenePossHeatMap <- function(gene.copy.num, prefix){
   two.color.heatmap <- gene.copy.num
   two.color.heatmap[two.color.heatmap > 0] <- 1
-  png(paste(prefix, 'gene_poss.png', sep = ""))
+  png(paste(prefix, 'gene_presence_absence.png', sep = ""))
 
   heatmap.2(as.matrix(two.color.heatmap), col=brewer.pal(3,"BuGn"),
-            trace="none", margins=c(5,15))
+            trace="none", margins=c(10,10))
   graphics.off()
 }
 
@@ -109,7 +109,7 @@ main <- function(){
   out.file <- paste(outdir, "/", nickname, "_cluster_counts.csv", sep="")
   MakeGeneCountsTable(gene.data.copies, gene.data.full, out.file)
 
-  prefix <- paste(outdir, "/", nickname, "_heatmap_all_", sep="")
+  prefix <- paste(outdir, "/", nickname, "_heatmap_", sep="")
   MakeHeatMaps(gene.data.copies, prefix)
 
   gene.data.copies.distrib <- FilterCoreGenes(gene.data.copies)
