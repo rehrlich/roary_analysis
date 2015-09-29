@@ -20,7 +20,7 @@ def get_gene_counts_dict(poss_mat):
 # Input is the gene_counts_dict and number of strains from roary
 # Writes the number of genes ordered by the key numbers
 def print_c_for_fsgm(gene_counts_dict, num_strains):
-    ordered_gene_counts = []
+    ordered_gene_counts = [0]
     for i in range(1, num_strains + 1):
         ordered_gene_counts.append(gene_counts_dict[i])
     sys.stdout.write(' '.join(map(str, ordered_gene_counts)))
