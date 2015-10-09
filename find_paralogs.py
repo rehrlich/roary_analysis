@@ -172,6 +172,8 @@ def make_output(out_data, in_folder, paralogs, out_folder, nickname):
     collapsed_paralogs = merge_paralogs(all_data, paralogs)
     write_output(prefix, "gene_presence_absence_paralogs_merged",
                  collapsed_paralogs)
+    write_output(in_folder, "gene_presence_absence_paralogs_merged",
+                 collapsed_paralogs)
 
             
 def main():
