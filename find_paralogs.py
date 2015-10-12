@@ -11,6 +11,7 @@
 
 import numpy as np
 import sys
+from itertools import izip
 
 
 # Input is the folder with the roary output files
@@ -38,7 +39,9 @@ def get_pres_abs_data(folder):
 def get_data(folder):
     cluster_names, split_clusters, all_data = get_pres_abs_data(folder)
     with open(folder + "/_inflated_unsplit_mcl_groups", 'rU') as f:
-        unsplit_clusters = [x.split() for x in f.read().split('\n')]
+        unsplit_clusters = [x.split()
+                            for x in f.read().split('\n') if len(x) > 0]
+        
     return cluster_names, split_clusters, np.array(unsplit_clusters)
 
 # Input is a list of split clusters names and a list of lists with list
@@ -47,7 +50,7 @@ def get_data(folder):
 # the gene cluster's name
 def make_split_index(cluster_names, split_clusters):
     inverted_index = dict()
-    for name, genes in zip(cluster_names, split_clusters):
+    for name, genes in izip(cluster_names, split_clusters):
         for gene in genes:
             inverted_index[gene] = name
     return inverted_index
@@ -174,19 +177,69 @@ def make_output(out_data, in_folder, paralogs, out_folder, nickname):
                  collapsed_paralogs)
     write_output(in_folder, "gene_presence_absence_paralogs_merged",
                  collapsed_paralogs)
+    return collapsed_paralogs
 
-            
+# Input: a float
+# Output: a string of the input as a percentage
+def percent(decimal):
+    return str(int(decimal * 100)) + "%"
+
+# Inputs:
+# gene_counts - a list of the number of strains that have a copy of a cluster
+# (lo, hi, name) - cutoff fractions and the name of the cluster type
+# total_strains - an int
+# Returns a string describing the number of clusters found in some fraction
+# of strains.  Ex "Core genes (99% <= strains < 100%):	137"
+def get_num_clusters(gene_counts, (lo, hi, name), total_strains):
+    num = sum(1 for x in gene_counts
+               if x >= lo * total_strains and x < hi * total_strains)
+    txt = ''.join([name, " genes (", percent(lo), " <= strains < ",
+                   percent(hi), "):\t", str(num)])
+    return txt
+
+# Inputs:  a list of list with the gene +- matrix (including headings) with the
+# paralogs collapsed, roary input folder
+# Writes summary statistics to the roary folder
+def make_summary_stats(collapsed_paralogs, in_folder):
+    gene_data = collapsed_paralogs[1:][11:]
+    total_strains = len(collapsed_paralogs[1][11:])
+
+    num_strains_with_gene = list()
+    for row in gene_data[1:]:
+        strains = 0
+        for col in row[11:]:
+            if len(col) > 0:
+                strains += 1
+        num_strains_with_gene.append(strains)
+
+    cutoffs = [(0.99, 1.01, "Core"), [0.95, 0.99, "Soft core"],
+               [0.15, 0.95, "Shell"], [0.0, 0.15, "Cloud"]]
+
+    output = [get_num_clusters(num_strains_with_gene, cutoff, total_strains)
+              for cutoff in cutoffs]
+    output.append("Total genes:\t" + str(len(gene_data) - 1))
+    output = '\n'.join(output).replace("< 101", "<= 100")
+                  
+    with open(in_folder + "/summary_statistics_paralogs_merged.csv", 'w') as f:
+        f.write(output)
+  
+        
 def main():
     in_folder = sys.argv[1]
     out_folder = sys.argv[2]
     nickname = sys.argv[3]
+    
     cluster_names, split_clusters, unsplit_clusters = get_data(in_folder)
     gene_name_to_cluster_dict = make_split_index(cluster_names, split_clusters)
     paralogs = map_unsplit_to_split(gene_name_to_cluster_dict, unsplit_clusters)
+    
     check_paralogs_unique(paralogs, cluster_names)
+    
     cluster_to_paralog_counts = make_output_data(paralogs)
-    make_output(cluster_to_paralog_counts, in_folder, paralogs, out_folder,
-                nickname)
+    collapsed_paralogs = make_output(cluster_to_paralog_counts, in_folder,
+                                     paralogs, out_folder, nickname)
+
+    make_summary_stats(collapsed_paralogs, in_folder)
     
     
 if __name__ == "__main__":
