@@ -1,13 +1,16 @@
 # Author:  Rachel Ehrlich
 # Input is the path to a roary folder that was created using the 
 # --dont_delete_files flag, the output directory and a nickname
-# for the analysis
-# Outputs three .csv files
+# for the analysis.
+# Outputs four .csv files
 # gene_presence_absence_paralogs_annotated is the original roary output
 # with columns added for paralog counts and lists
 # gene_presence_absence_paralogs_merged is formatted like the roary output
-# but entries for paralogs have been combined using tabs
+# but entries for paralogs have been combined using tabs.  This is also
+# written to the input folder.
 # paralog_table maps each gene to its paralogs
+# summary_statistics_paralogs_merged is like the summary statistics from the
+# original output but has the gene counts from before splitting paralogs.
 
 import numpy as np
 import sys
@@ -200,7 +203,7 @@ def get_num_clusters(gene_counts, (lo, hi, name), total_strains):
 # Inputs:  a list of list with the gene +- matrix (including headings) with the
 # paralogs collapsed, roary input folder
 # Writes summary statistics to the roary folder
-def make_summary_stats(collapsed_paralogs, in_folder):
+def make_summary_stats(collapsed_paralogs, in_folder, out_folder):
     gene_data = collapsed_paralogs[1:][11:]
     total_strains = len(collapsed_paralogs[1][11:])
 
@@ -222,6 +225,9 @@ def make_summary_stats(collapsed_paralogs, in_folder):
                   
     with open(in_folder + "/summary_statistics_paralogs_merged.csv", 'w') as f:
         f.write(output)
+
+    with open(out_folder + "/summary_statistics_paralogs_merged.csv", 'w') as f:
+        f.write(output)
   
         
 def main():
@@ -239,7 +245,7 @@ def main():
     collapsed_paralogs = make_output(cluster_to_paralog_counts, in_folder,
                                      paralogs, out_folder, nickname)
 
-    make_summary_stats(collapsed_paralogs, in_folder)
+    make_summary_stats(collapsed_paralogs, in_folder, out_folder)
     
     
 if __name__ == "__main__":
