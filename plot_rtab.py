@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 # Author:  Rachel Ehrlich
 # This program takes as input a folder with output from roary,
 # an output directory that has the results from simulate_pan_genome.py

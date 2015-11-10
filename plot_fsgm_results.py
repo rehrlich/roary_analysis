@@ -49,16 +49,17 @@ def get_genes_per_genome_data(my_file):
 # Input is a tuple with lists of counts for core, new and total genes, an
 # output file name and the most likely value for n.  Writes a pdf plot to the
 # output file
-def plot_genes_per_genome((core, new_genes, total), out_file, best_n):
+def plot_genes_per_genome((core, new_genes, total), out_file, best_n=0):
     num_genomes = range(1, len(new_genes) + 1)
 
     with PdfPages(out_file) as pdf:
         plt.plot(num_genomes, new_genes, 'ro', label='new')
         plt.plot(num_genomes, total, 'bs', label='total')
         plt.plot(num_genomes, core, 'g^', label='core')
-        
-        plt.axhline(best_n, color = 'k')
-        plt.annotate(s='N=' + str(best_n), xy=(5, best_n - 120))
+
+        if best_n > 0:
+            plt.axhline(best_n, color = 'k')
+            plt.annotate(s='N=' + str(best_n), xy=(5, best_n - 120))
         
         plt.xlabel("Number of genomes")
         plt.ylabel('Number of genes')

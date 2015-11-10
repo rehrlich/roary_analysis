@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 # Author:  Rachel Ehrlich
 # This program takes as input the folder with the output from roary, an output
 # folder and a nickname for the results.  It creates five files in the
@@ -9,8 +10,6 @@
 # difference = present in exactly one of the strains (xor)
 # comparison = similarity - difference
 # pair unique = present in only those two stains
-
-
 
 import numpy as np
 from collections import namedtuple
@@ -37,7 +36,7 @@ def get_pres_abs_mat(folder):
         gene = row[0]
         copy_num = row[11:]
         poss_data[i] = np.array([len(x) > 0 for x in copy_num], dtype=bool)
-       
+
     return poss_data, col_headings
 
 # Input: two numpy column vectors

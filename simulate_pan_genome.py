@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 # Author:  Rachel Ehrlich
 # This program takes as input a folder with roary output, an output directory
 # for the results, a nickname for the analysis, a comma separated string of 
