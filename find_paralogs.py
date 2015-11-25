@@ -1,17 +1,19 @@
-# Author:  Rachel Ehrlich
-# Input is the path to a roary folder that was created using the 
-# --dont_delete_files flag, the output directory and a nickname
-# for the analysis.
-# Outputs four .csv files
-# gene_presence_absence_paralogs_annotated is the original roary output
-# with columns added for paralog counts and lists
-# gene_presence_absence_paralogs_merged is formatted like the roary output
-# but entries for paralogs have been combined using tabs.  This is also
-# written to the input folder.
-# paralog_table maps each gene to its paralogs
-# summary_statistics_paralogs_merged is like the summary statistics from the
-# original output but has the gene counts from before splitting paralogs.
-
+#!/usr/bin/env python2
+"""
+Author:  Rachel Ehrlich
+Input is the path to a roary folder that was created using the
+--dont_delete_files flag, the output directory and a nickname
+for the analysis.
+Outputs four .csv files
+gene_presence_absence_paralogs_annotated is the original roary output
+with columns added for paralog counts and lists
+gene_presence_absence_paralogs_merged is formatted like the roary output
+but entries for paralogs have been combined using tabs.  This is also
+written to the input folder.
+paralog_table maps each gene to its paralogs
+summary_statistics_paralogs_merged is like the summary statistics from the
+original output but has the gene counts from before splitting paralogs.
+"""
 import numpy as np
 import sys
 from itertools import izip
@@ -35,6 +37,7 @@ def get_pres_abs_data(folder):
 
     return cluster_names, np.array(gene_data), np.array(split_lines)
 
+
 # Input is a roary folder
 # Returns the names for the clusters after splitting paralogs
 # Returns two lists of lists with the genes in each cluster
@@ -47,6 +50,7 @@ def get_data(folder):
         
     return cluster_names, split_clusters, np.array(unsplit_clusters)
 
+
 # Input is a list of split clusters names and a list of lists with list
 # i containing the genes in cluster name i.
 # Returns an inverted index that maps the gene name (prokka something) to
@@ -57,6 +61,7 @@ def make_split_index(cluster_names, split_clusters):
         for gene in genes:
             inverted_index[gene] = name
     return inverted_index
+
 
 # Input: inverted index that maps the gene name (prokka something) to
 # the gene cluster's name, list of lists containing gene names for the 
@@ -72,6 +77,7 @@ def map_unsplit_to_split(inverted_index, unsplit_clusters):
         paralogs.append(para_group)
     return paralogs
 
+
 # Input is a list of sets of paralogs, and the list of all split clusters
 # Assert fails if a cluster is in multiple paralog groups or if a cluster
 # is missing
@@ -80,6 +86,7 @@ def check_paralogs_unique(paralogs, cluster_names):
     joined_paralogs = set().union(*paralogs)
     assert(len(joined_paralogs) == num_clusters)
     assert(len(cluster_names) == num_clusters)
+
 
 # Input is a list of sets of paralogs
 # Outputs a list of lists where each list represents one split cluster
@@ -93,6 +100,7 @@ def make_output_data(paralogs):
         for cluster in clusters:
             out_data[cluster] = [num_clusters, c_list]
     return out_data
+
 
 # Input is a list of rows which are paralogs of each other
 # Output is a single row where each column is a tab separated list of entries
@@ -112,6 +120,7 @@ def merge_rows(paralog_rows):
         else:
             new_row.append(new_entry)
     return new_row
+
 
 # Inputs are a list of lists with all the input roary data and a 
 # list of sets of paralogs
@@ -141,6 +150,7 @@ def merge_paralogs(all_data, paralogs):
 
     return merged_output
 
+
 # Input: prefix - path + nickname
 # file_name - suffix w/o extension, data is a list of lists
 # Write data to a file with each entry being double quoted and commas and 
@@ -149,6 +159,7 @@ def write_output(prefix, file_name, data):
     output_str = '\n'.join('"' + ('","'.join(x)) + '"' for x in data)
     with open(prefix + file_name + ".csv", 'w') as f:
         f.write(output_str)
+
 
 # Inputs:
 # out_data list of lists with the number of clusters (including self) 
@@ -182,10 +193,12 @@ def make_output(out_data, in_folder, paralogs, out_folder, nickname):
                  collapsed_paralogs)
     return collapsed_paralogs
 
+
 # Input: a float
 # Output: a string of the input as a percentage
 def percent(decimal):
     return str(int(decimal * 100)) + "%"
+
 
 # Inputs:
 # gene_counts - a list of the number of strains that have a copy of a cluster
@@ -199,6 +212,7 @@ def get_num_clusters(gene_counts, (lo, hi, name), total_strains):
     txt = ''.join([name, " genes (", percent(lo), " <= strains < ",
                    percent(hi), "):\t", str(num)])
     return txt
+
 
 # Inputs:  a list of list with the gene +- matrix (including headings) with the
 # paralogs collapsed, roary input folder

@@ -38,8 +38,11 @@ MakeGenePossHeatMap <- function(gene.copy.num, prefix){
 # Makes a heatmap showing gene counts for the gene.copy.num
 # matrix.  prefix is for the output file name
 MakeGeneCountsHeatMap <- function(gene.copy.num, prefix){
-  png(paste(prefix, 'gene_counts.png', sep = ""))
-  heatmap.2(as.matrix(gene.copy.num), trace="none", margins=c(5,15))
+  three.color.heatmap <- gene.copy.num
+  three.color.heatmap[three.color.heatmap > 1] <- 2
+  png(paste(prefix, 'zero_one_multiple.png', sep = ""))
+
+  heatmap.2(as.matrix(three.color.heatmap), trace="none", margins=c(5,15),  col=c("gray","green","blue"))
   graphics.off()
 }
 
