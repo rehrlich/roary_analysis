@@ -256,6 +256,7 @@ def main():
     check_paralogs_unique(paralogs, cluster_names)
     
     cluster_to_paralog_counts = make_output_data(paralogs)
+    return
     collapsed_paralogs = make_output(cluster_to_paralog_counts, in_folder,
                                      paralogs, out_folder, nickname)
 
