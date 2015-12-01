@@ -128,6 +128,7 @@ def plot_tree_heatmap(mdist, roary, roary_sorted, t):
                         aspect='auto',
                         interpolation='none',
                         )
+
         ax1.set_yticks([])
         ax1.set_xticks([])
         ax1.axis('off')
@@ -141,7 +142,6 @@ def plot_tree_heatmap(mdist, roary, roary_sorted, t):
 
         Phylo.draw(t, axes=ax,
                    show_confidence=False,
-                   label_func=lambda x: None,
                    xticks=([],), yticks=([],),
                    ylabel=('',), xlabel=('',),
                    xlim=(-0.01, mdist + 0.01),
@@ -177,7 +177,7 @@ def main():
     plot_tree_heatmap(mdist, roary, roary_sorted, tree)
 
     make_pie_chart(roary)
-    
+
 
 if __name__ == "__main__":
     main()
