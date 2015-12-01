@@ -40,26 +40,25 @@ def get_pres_abs_mat(folder):
     return poss_data, col_headings
 
 
-# Input: two numpy column vectors
+# Input: two numpy row vectors
 # returns the number of positions where the value is true in both strains
-def get_sim(vec1, vec2):
-    return sum(np.logical_and(vec1, vec2))
+def get_sim2(vec1, vec2):
+    return np.sum(np.logical_and(vec1, vec2))
 
 
-# Input: two numpy column vectors
+# Input: two numpy row vectors
 # returns the number of positions where the value is true in exactly one strain
-def get_diff(vec1, vec2):
-    return sum(np.logical_xor(vec1, vec2))
+def get_diff2(vec1, vec2):
+    return np.sum(np.logical_xor(vec1, vec2))
 
 
 # Input:  the gene possession matrix and the column indices to consider
 # Output: the number of rows where the value is true
 # in only the two specified columns
-def get_pair_unique(poss_mat, i, j):
-    a = np.sum(poss_mat, axis=1) == 2
+def get_pair_unique2(poss_mat, i, j):
     b = poss_mat[:, i]
     c = poss_mat[:, j]
-    return sum(np.logical_and(np.logical_and(a, b), c))
+    return np.sum(np.logical_and(b, c))
 
 
 # Inputs: the gene possession matrix and number of strains it contains
@@ -70,38 +69,47 @@ def get_pair_unique(poss_mat, i, j):
 def compare_all_strain_pairs(poss_mat, num_strains):
     num_genes = namedtuple('num_genes', ['sim', 'diff', 'comp', 'pair_unique'])
     strain_pairs = dict()
-    
+
+    pair_unique_mat = poss_mat[np.sum(poss_mat, axis=1) == 2, :]
+
+    no_core_mat = poss_mat[np.sum(poss_mat, axis=1) != num_strains, :].T
+
+    no_unique_mat = poss_mat[np.sum(poss_mat, axis=1) != 1, :].T
+
     # Iterate over all unique pairs of strains
     for i in xrange(num_strains):
         for j in xrange(i + 1, num_strains):
-            s = get_sim(poss_mat[:, i], poss_mat[:, j])
-            d = get_diff(poss_mat[:, i], poss_mat[:, j])
-            c = s - d
-            p = get_pair_unique(poss_mat, i, j)
-            strain_pairs[(i, j)] = num_genes(s, d, c, p)
+            s2 = get_sim2(no_unique_mat[i, :], no_unique_mat[j, :])
+            d2 = get_diff2(no_core_mat[i, :], no_core_mat[j, :])
+
+            c = s2 - d2
+
+            p2 = get_pair_unique2(pair_unique_mat, i, j)
+
+            strain_pairs[(i, j)] = num_genes(s2, d2, c, p2)
     return strain_pairs
 
 
 def tests1():
     a = np.array([True, True], dtype=bool)
     b = np.array([False, False], dtype=bool)
-    assert(get_sim(a, a) == 2)
-    assert(get_sim(a, b) == 0)
-    assert(get_sim(b, a) == 0)
-    assert(get_sim(b, b) == 0)
+    assert(get_sim2(a, a) == 2)
+    assert(get_sim2(a, b) == 0)
+    assert(get_sim2(b, a) == 0)
+    assert(get_sim2(b, b) == 0)
     
-    assert(get_diff(a, a) == 0)
-    assert(get_diff(a, b) == 2)
-    assert(get_diff(b, a) == 2)
-    assert(get_diff(b, b) == 0)
+    assert(get_diff2(a, a) == 0)
+    assert(get_diff2(a, b) == 2)
+    assert(get_diff2(b, a) == 2)
+    assert(get_diff2(b, b) == 0)
     
     m = np.zeros((5, 5), dtype=bool)
     m[0, 0] = True
     m[0, 1] = True
-    assert(get_pair_unique(m, 0, 1) == 1)
-    assert(get_pair_unique(m, 1, 0) == 1)
-    assert(get_pair_unique(m, 0, 2) == 0)
-    assert(get_pair_unique(m, 2, 3) == 0)
+    assert(get_pair_unique2(m, 0, 1) == 1)
+    assert(get_pair_unique2(m, 1, 0) == 1)
+    assert(get_pair_unique2(m, 0, 2) == 0)
+    assert(get_pair_unique2(m, 2, 3) == 0)
     print 'tests pass'
 
 
