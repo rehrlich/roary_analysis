@@ -15,6 +15,7 @@ import numpy as np
 from collections import namedtuple
 import sys
 
+
 # Input is the folder with the roary output files
 # This takes the gene_presence_absence.csv file and converts it to a gene
 # presence and absence matrix
@@ -33,30 +34,33 @@ def get_pres_abs_mat(folder):
 
     for i in xrange(len(rows)):
         row = rows[i]
-        gene = row[0]
         copy_num = row[11:]
         poss_data[i] = np.array([len(x) > 0 for x in copy_num], dtype=bool)
 
     return poss_data, col_headings
+
 
 # Input: two numpy column vectors
 # returns the number of positions where the value is true in both strains
 def get_sim(vec1, vec2):
     return sum(np.logical_and(vec1, vec2))
 
+
 # Input: two numpy column vectors
 # returns the number of positions where the value is true in exactly one strain
 def get_diff(vec1, vec2):
     return sum(np.logical_xor(vec1, vec2))
+
 
 # Input:  the gene possession matrix and the column indices to consider
 # Output: the number of rows where the value is true
 # in only the two specified columns
 def get_pair_unique(poss_mat, i, j):
     a = np.sum(poss_mat, axis=1) == 2
-    b = poss_mat[:,i]
-    c = poss_mat[:,j]
+    b = poss_mat[:, i]
+    c = poss_mat[:, j]
     return sum(np.logical_and(np.logical_and(a, b), c))
+
 
 # Inputs: the gene possession matrix and number of strains it contains
 # Output: the strain_pairs data structure which is a dict() whose keys are
@@ -70,41 +74,44 @@ def compare_all_strain_pairs(poss_mat, num_strains):
     # Iterate over all unique pairs of strains
     for i in xrange(num_strains):
         for j in xrange(i + 1, num_strains):
-            s = get_sim(poss_mat[:,i], poss_mat[:,j])
-            d = get_diff(poss_mat[:,i], poss_mat[:,j])
+            s = get_sim(poss_mat[:, i], poss_mat[:, j])
+            d = get_diff(poss_mat[:, i], poss_mat[:, j])
             c = s - d
             p = get_pair_unique(poss_mat, i, j)
-            strain_pairs[(i,j)] = num_genes(s, d, c, p)
+            strain_pairs[(i, j)] = num_genes(s, d, c, p)
     return strain_pairs
+
 
 def tests1():
     a = np.array([True, True], dtype=bool)
     b = np.array([False, False], dtype=bool)
-    assert(get_sim(a,a) == 2)
-    assert(get_sim(a,b) == 0)
-    assert(get_sim(b,a) == 0)
-    assert(get_sim(b,b) == 0)
+    assert(get_sim(a, a) == 2)
+    assert(get_sim(a, b) == 0)
+    assert(get_sim(b, a) == 0)
+    assert(get_sim(b, b) == 0)
     
-    assert(get_diff(a,a) == 0)
-    assert(get_diff(a,b) == 2)
-    assert(get_diff(b,a) == 2)
-    assert(get_diff(b,b) == 0)
+    assert(get_diff(a, a) == 0)
+    assert(get_diff(a, b) == 2)
+    assert(get_diff(b, a) == 2)
+    assert(get_diff(b, b) == 0)
     
-    m = np.zeros((5,5), dtype=bool)
-    m[0,0] = True
-    m[0,1] = True
-    assert(get_pair_unique(m,0,1) == 1)
-    assert(get_pair_unique(m,1,0) == 1)
-    assert(get_pair_unique(m,0,2) == 0)
-    assert(get_pair_unique(m,2,3) == 0)
+    m = np.zeros((5, 5), dtype=bool)
+    m[0, 0] = True
+    m[0, 1] = True
+    assert(get_pair_unique(m, 0, 1) == 1)
+    assert(get_pair_unique(m, 1, 0) == 1)
+    assert(get_pair_unique(m, 0, 2) == 0)
+    assert(get_pair_unique(m, 2, 3) == 0)
     print 'tests pass'
+
 
 # Makes a single table containing all four types of output
 def make_output(strain_pairs, col_headings, num_strains):
     prefix = ''
     output = list()
     output.append("Strain\t" + '\t'.join(col_headings[1:]))
-    row_labels = ['\tSimilarity', '\tDifference', '\tComparison', '\tPairUnique']
+    row_labels = ['\tSimilarity', '\tDifference', '\tComparison',
+                  '\tPairUnique']
 
     for row in xrange(num_strains - 1):
         for i in xrange(4):
@@ -112,8 +119,9 @@ def make_output(strain_pairs, col_headings, num_strains):
             for col in xrange(row + 1, num_strains):
                 curr.append(strain_pairs[(row, col)][i])
             output.append('\t'.join(map(str, curr)) + row_labels[i])
-        prefix = prefix + '\t'
+        prefix += '\t'
     return '\n'.join(output)
+
 
 # Makes three tables for the similarity, difference and pair unique output
 def make_output_3(strain_pairs, col_headings, num_strains):
@@ -122,7 +130,7 @@ def make_output_3(strain_pairs, col_headings, num_strains):
     outputs = []
     
     for i in [0, 1, 3]:
-        output = []
+        output = list()
         output.append("Strain\t" + '\t'.join(rev_col_headings))
         for row in xrange(num_strains - 1):
             curr = [col_headings[row]]
@@ -134,10 +142,12 @@ def make_output_3(strain_pairs, col_headings, num_strains):
 
     return outputs
 
+
 # Gets all data values for the output type specified by index
 # example:  returns all pairwise similarity counts
 def get_all_values(strain_pairs, index):
     return [val[index] for k, val in strain_pairs.items()]
+
 
 # Computes the min, max, mean and standard deviation for the four output types
 def calc_stats(strain_pairs):
@@ -155,10 +165,12 @@ def calc_stats(strain_pairs):
         output.append('\t'.join(map(str, curr)))       
     return '\n'.join(output)
 
+
 def write_output(text, file_name):
     with open(file_name, 'w') as the_file:
         the_file.write(text)
-        
+
+
 def main():
     in_folder = sys.argv[1]
     out_folder = sys.argv[2]
