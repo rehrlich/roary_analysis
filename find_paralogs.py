@@ -171,15 +171,15 @@ def write_output(prefix, file_name, data):
 def make_output(out_data, in_folder, paralogs, out_folder, nickname):
     cluster_names, split_clusters, all_data = get_pres_abs_data(in_folder)
     
-    ordered_out_data = [['num_paralogs','paralog_group']]
+    ordered_out_data = [['num_paralogs', 'paralog_group']]
     for name in cluster_names:
         ordered_out_data.append(out_data[name])
     ordered_out_data = np.vstack(ordered_out_data)
     
     prefix = out_folder + '/' + nickname + '_'
     
-    combined_output = np.hstack((all_data[:,:2], ordered_out_data,
-                                 all_data[:,2:]))
+    combined_output = np.hstack((all_data[:, :2], ordered_out_data,
+                                 all_data[:, 2:]))
     write_output(prefix, "gene_presence_absence_paralogs_annotated",
                  combined_output)
 
@@ -218,21 +218,17 @@ def get_num_clusters(gene_counts, (lo, hi, name), total_strains):
 # paralogs collapsed, roary input folder
 # Writes summary statistics to the roary folder
 def make_summary_stats(collapsed_paralogs, in_folder, out_folder):
-    gene_data = collapsed_paralogs[1:][11:]
-    total_strains = len(collapsed_paralogs[1][11:])
+    gene_data = collapsed_paralogs[1:, 11:]
+    total_strains = len(collapsed_paralogs[1, 11:])
 
-    num_strains_with_gene = list()
-    for row in gene_data[1:]:
-        strains = 0
-        for col in row[11:]:
-            if len(col) > 0:
-                strains += 1
-        num_strains_with_gene.append(strains)
+    has_gene = np.vectorize(lambda x: len(x) > 0, otypes=[bool])
+    gene_presence = has_gene(gene_data)
+    cluster_counts = gene_presence.sum(axis=1)
 
     cutoffs = [(0.99, 1.01, "Core"), [0.95, 0.99, "Soft core"],
                [0.15, 0.95, "Shell"], [0.0, 0.15, "Cloud"]]
 
-    output = [get_num_clusters(num_strains_with_gene, cutoff, total_strains)
+    output = [get_num_clusters(cluster_counts, cutoff, total_strains)
               for cutoff in cutoffs]
     output.append("Total genes:\t" + str(len(gene_data) - 1))
     output = '\n'.join(output).replace("< 101", "<= 100")
@@ -242,8 +238,28 @@ def make_summary_stats(collapsed_paralogs, in_folder, out_folder):
 
     with open(out_folder + "/summary_statistics_paralogs_merged.csv", 'w') as f:
         f.write(output)
-  
-        
+
+
+# Makes gene_presence_absence.Rtab but after unsplitting paralogs
+# Inputs:  a list of list with the gene +- matrix (including headings) with the
+# paralogs collapsed
+# Writes summary statistics to the roary folder
+def make_gpa_rtab(collapsed_paralogs, in_folder):
+    strain_headings = collapsed_paralogs[0, 11:]
+    gene_data = collapsed_paralogs[1:, 11:]
+    gene_names = np.char.replace(collapsed_paralogs[1:, 0], '\t', ',')
+
+    has_gene = np.vectorize(lambda x: str(int(len(x) > 0)), otypes=[str])
+    pres_abs = has_gene(gene_data)
+
+    with open(in_folder + '/gene_presence_absence_paralogs_merged.Rtab', 'w') as f:
+        f.write('Gene_name\t')
+        f.write('\t'.join(strain_headings))
+        f.write('\n')
+        f.write('\n'.join('\t'.join(x) for x in
+                          np.column_stack((gene_names, pres_abs))))
+
+
 def main():
     in_folder = sys.argv[1]
     out_folder = sys.argv[2]
@@ -256,10 +272,11 @@ def main():
     check_paralogs_unique(paralogs, cluster_names)
     
     cluster_to_paralog_counts = make_output_data(paralogs)
-    return
-    collapsed_paralogs = make_output(cluster_to_paralog_counts, in_folder,
-                                     paralogs, out_folder, nickname)
 
+    collapsed_paralogs = np.array(make_output(cluster_to_paralog_counts,
+                                              in_folder, paralogs, out_folder,
+                                              nickname))
+    make_gpa_rtab(collapsed_paralogs, in_folder)
     make_summary_stats(collapsed_paralogs, in_folder, out_folder)
     
     
