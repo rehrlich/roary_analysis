@@ -57,16 +57,52 @@ def get_options():
     return parser.parse_args()
 
 
-def main():
-    options = get_options()
+def make_freq_plot(roary):
+    # Pangenome frequency plot
+    plt.figure(figsize=(7, 5))
+    plt.hist(roary.sum(axis=1), roary.shape[1],
+             histtype="stepfilled", alpha=.7)
+    plt.xlabel('Number of genomes')
+    plt.ylabel('Number of genes')
+    sns.despine(left=True,
+                bottom=True)
+    plt.savefig('pangenome_frequency.png')
+    plt.clf()
 
-    sns.set_style('white')
 
-    t = Phylo.read(options.tree, 'newick')
+def make_pie_chart(roary):
+    # Plot the pangenome pie chart
+    plt.figure(figsize=(10, 10))
+    core = roary[(roary.sum(axis=1) >= roary.shape[1] * 0.99) & (
+        roary.sum(axis=1) <= roary.shape[1])].shape[0]
+    softcore = roary[(roary.sum(axis=1) >= roary.shape[1] * 0.95) & (
+        roary.sum(axis=1) < roary.shape[1] * 0.99)].shape[0]
+    shell = roary[(roary.sum(axis=1) >= roary.shape[1] * 0.15) & (
+        roary.sum(axis=1) < roary.shape[1] * 0.95)].shape[0]
+    cloud = roary[roary.sum(axis=1) < roary.shape[1] * 0.15].shape[0]
+    total = roary.shape[0]
 
-    # Max distance to create better plots
-    mdist = max([t.distance(t.root, x) for x in t.get_terminals()])
+    def my_autopct(pct):
+        val = int(round(pct * total / 100.0))
+        return '{v:d}'.format(v=val)
 
+    a = plt.pie([core, softcore, shell, cloud],
+                labels=['core\n(%d <= strains <= %d)' % (
+                    roary.shape[1] * .99, roary.shape[1]),
+                        'soft-core\n(%d <= strains < %d)' % (
+                            roary.shape[1] * .95, roary.shape[1] * .99),
+                        'shell\n(%d <= strains < %d)' % (
+                            roary.shape[1] * .15, roary.shape[1] * .95),
+                        'cloud\n(strains < %d)' % (roary.shape[1] * .15)],
+                explode=[0.1, 0.05, 0.02, 0], radius=0.9,
+                colors=[(0, 0, 1, float(x) / total) for x in
+                        (core, softcore, shell, cloud)],
+                autopct=my_autopct)
+    plt.savefig('pangenome_pie.png')
+    plt.clf()
+
+
+def get_roary_data(options):
     # Load roary
     roary = pd.read_table(options.spreadsheet,
                           sep=',',
@@ -75,32 +111,13 @@ def main():
     roary.set_index('Gene', inplace=True)
     # Drop the other info columns
     roary.drop(list(roary.columns[:10]), axis=1, inplace=True)
-
     # Transform it in a presence/absence matrix (1/0)
     roary.replace('.{2,100}', 1, regex=True, inplace=True)
     roary.replace(np.nan, 0, regex=True, inplace=True)
+    return roary
 
-    # Sort the matrix by the sum of strains presence
-    idx = roary.sum(axis=1).order(ascending=False).index
-    roary_sorted = roary.ix[idx]
 
-    # Pangenome frequency plot
-    plt.figure(figsize=(7, 5))
-
-    plt.hist(roary.sum(axis=1), roary.shape[1],
-             histtype="stepfilled", alpha=.7)
-
-    plt.xlabel('Number of genomes')
-    plt.ylabel('Number of genes')
-
-    sns.despine(left=True,
-                bottom=True)
-    plt.savefig('pangenome_frequency.png')
-    plt.clf()
-
-    # Sort the matrix according to tip labels in the tree
-    roary_sorted = roary_sorted[[x.name for x in t.get_terminals()]]
-
+def plot_tree_heatmap(mdist, roary, roary_sorted, t):
     # Plot presence/absence matrix against the tree
     with sns.axes_style('whitegrid'):
         fig = plt.figure(figsize=(17, 10))
@@ -135,41 +152,32 @@ def main():
         plt.savefig('pangenome_matrix.png')
         plt.clf()
 
-    # Plot the pangenome pie chart
-    plt.figure(figsize=(10, 10))
 
-    core = roary[(roary.sum(axis=1) >= roary.shape[1] * 0.99) & (
-        roary.sum(axis=1) <= roary.shape[1])].shape[0]
+def main():
+    options = get_options()
 
-    softcore = roary[(roary.sum(axis=1) >= roary.shape[1] * 0.95) & (
-        roary.sum(axis=1) < roary.shape[1] * 0.99)].shape[0]
+    sns.set_style('white')
 
-    shell = roary[(roary.sum(axis=1) >= roary.shape[1] * 0.15) & (
-        roary.sum(axis=1) < roary.shape[1] * 0.95)].shape[0]
+    tree = Phylo.read(options.tree, 'newick')
 
-    cloud = roary[roary.sum(axis=1) < roary.shape[1] * 0.15].shape[0]
+    # Max distance to create better plots
+    mdist = max([tree.distance(tree.root, x) for x in tree.get_terminals()])
 
-    total = roary.shape[0]
+    roary = get_roary_data(options)
 
-    def my_autopct(pct):
-        val = int(round(pct * total / 100.0))
-        return '{v:d}'.format(v=val)
+    # Sort the matrix by the sum of strains presence
+    idx = roary.sum(axis=1).order(ascending=False).index
+    roary_sorted = roary.ix[idx]
 
-    a = plt.pie([core, softcore, shell, cloud],
-                labels=['core\n(%d <= strains <= %d)' % (
-                    roary.shape[1] * .99, roary.shape[1]),
-                        'soft-core\n(%d <= strains < %d)' % (
-                        roary.shape[1] * .95, roary.shape[1] * .99),
-                        'shell\n(%d <= strains < %d)' % (
-                        roary.shape[1] * .15, roary.shape[1] * .95),
-                        'cloud\n(strains < %d)' % (roary.shape[1] * .15)],
-                explode=[0.1, 0.05, 0.02, 0], radius=0.9,
-                colors=[(0, 0, 1, float(x) / total) for x in
-                        (core, softcore, shell, cloud)],
-                autopct=my_autopct)
+    make_freq_plot(roary)
 
-    plt.savefig('pangenome_pie.png')
-    plt.clf()
+    # Sort the matrix according to tip labels in the tree
+    roary_sorted = roary_sorted[[x.name for x in tree.get_terminals()]]
+
+    plot_tree_heatmap(mdist, roary, roary_sorted, tree)
+
+    make_pie_chart(roary)
+    
 
 if __name__ == "__main__":
     main()
