@@ -15,7 +15,7 @@ summary_statistics_paralogs_merged is like the summary statistics from the
 original output but has the gene counts from before splitting paralogs.
 """
 import numpy as np
-import sys
+from sys import argv, maxint
 from itertools import izip
 
 
@@ -132,7 +132,7 @@ def merge_paralogs(all_data, paralogs):
     
     for clusters in paralogs:
         paralog_rows = list()
-        first_index = sys.maxint
+        first_index = maxint
         for cluster in clusters:
             index = row_num[cluster]
             first_index = min(first_index, index)
@@ -140,8 +140,8 @@ def merge_paralogs(all_data, paralogs):
         merged_output.append([first_index, merge_rows(paralog_rows)])
     
     # Sorts, removes sort index, adds heading
-    merged_output.sort(key=lambda y: y[0])
-    merged_output = [y[1] for y in merged_output]
+    merged_output.sort(key=lambda x: x[0])
+    merged_output = [z[1] for z in merged_output]
     merged_output.insert(0, all_data[0])
 
     return merged_output
@@ -186,7 +186,7 @@ def make_output(out_data, in_folder, paralogs, out_folder, nickname):
     collapsed_paralogs = merge_paralogs(all_data, paralogs)
     write_output(prefix, "gene_presence_absence_paralogs_merged",
                  collapsed_paralogs)
-    write_output(in_folder, "gene_presence_absence_paralogs_merged",
+    write_output(in_folder, "/gene_presence_absence_paralogs_merged",
                  collapsed_paralogs)
     return collapsed_paralogs
 
@@ -258,9 +258,9 @@ def make_gpa_rtab(collapsed_paralogs, in_folder):
 
 
 def main():
-    in_folder = sys.argv[1]
-    out_folder = sys.argv[2]
-    nickname = sys.argv[3]
+    in_folder = argv[1]
+    out_folder = argv[2]
+    nickname = argv[3]
     
     cluster_names, split_clusters, unsplit_clusters = get_data(in_folder)
     gene_name_to_cluster_dict = make_split_index(cluster_names, split_clusters)
