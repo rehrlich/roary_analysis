@@ -113,12 +113,8 @@ def merge_rows(paralog_rows):
     
     # This iterates over columns in the untransposed array
     for column in np.array(paralog_rows).T:
-        new_entry = None
-        new_entry = '\t'.join(x for x in column if len(x) > 0 )
-        if new_entry is None:
-            new_row.append('')
-        else:
-            new_row.append(new_entry)
+        new_entry = '\t'.join(x for x in column if len(x) > 0)
+        new_row.append(new_entry)
     return new_row
 
 
@@ -144,8 +140,8 @@ def merge_paralogs(all_data, paralogs):
         merged_output.append([first_index, merge_rows(paralog_rows)])
     
     # Sorts, removes sort index, adds heading
-    merged_output.sort(key=lambda x: x[0])
-    merged_output = [x[1] for x in merged_output]
+    merged_output.sort(key=lambda y: y[0])
+    merged_output = [y[1] for y in merged_output]
     merged_output.insert(0, all_data[0])
 
     return merged_output
@@ -169,6 +165,7 @@ def write_output(prefix, file_name, data):
 # out_folder - output location
 # nickname - prefix for output files
 def make_output(out_data, in_folder, paralogs, out_folder, nickname):
+
     cluster_names, split_clusters, all_data = get_pres_abs_data(in_folder)
     
     ordered_out_data = [['num_paralogs', 'paralog_group']]
@@ -183,7 +180,7 @@ def make_output(out_data, in_folder, paralogs, out_folder, nickname):
     write_output(prefix, "gene_presence_absence_paralogs_annotated",
                  combined_output)
 
-    paralog_translation = np.hstack((all_data[:,:2], ordered_out_data)) 
+    paralog_translation = np.hstack((all_data[:, :2], ordered_out_data))
     write_output(prefix, "paralog_table", paralog_translation)
         
     collapsed_paralogs = merge_paralogs(all_data, paralogs)
@@ -276,6 +273,7 @@ def main():
     collapsed_paralogs = np.array(make_output(cluster_to_paralog_counts,
                                               in_folder, paralogs, out_folder,
                                               nickname))
+
     make_gpa_rtab(collapsed_paralogs, in_folder)
     make_summary_stats(collapsed_paralogs, in_folder, out_folder)
     
