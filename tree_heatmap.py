@@ -117,7 +117,18 @@ def get_roary_data(options):
     return roary
 
 
-def plot_tree_heatmap(mdist, roary, roary_sorted, t):
+def get_tree_name(options):
+    # strips path
+    if '/' in options.tree:
+        tree_name = options.tree.split('/')[-1]
+    else:
+        tree_name = options.tree
+    # tree_name = tree_name.rsplit('.', 1)[0]
+    return tree_name
+
+
+def plot_tree_heatmap(mdist, roary, roary_sorted, tree, tree_name):
+
     # Plot presence/absence matrix against the tree
     with sns.axes_style('whitegrid'):
         fig = plt.figure(figsize=(17, 10))
@@ -129,24 +140,26 @@ def plot_tree_heatmap(mdist, roary, roary_sorted, t):
                         interpolation='none',
                         )
 
+        # Creates an outline around the heatmap
         ax1.set_yticks([])
         ax1.set_xticks([])
-        ax1.axis('off')
+        #ax1.axis('off')
 
-        ax = fig.add_subplot(1, 2, 1)
-        ax = plt.subplot2grid((1, 40), (0, 0), colspan=10, axisbg='white')
+        # Adjust colspan if strain names overlap heatmap
+        ax = plt.subplot2grid((1, 40), (0, 0), colspan=7, axisbg='white')
 
         fig.subplots_adjust(wspace=0, hspace=0)
 
-        ax1.set_title('Roary matrix\n(%d gene clusters)' % roary.shape[0])
+        ax1.set_title('Cluster possession matrix\nSorted by cluster frequency\n'
+                      '(%d clusters)' % roary.shape[0])
 
-        Phylo.draw(t, axes=ax,
+        Phylo.draw(tree, axes=ax,
                    show_confidence=False,
                    xticks=([],), yticks=([],),
                    ylabel=('',), xlabel=('',),
                    xlim=(-0.01, mdist + 0.01),
                    axis=('off',),
-                   title=('parSNP tree\n(%d strains)' % roary.shape[1],),
+                   title=('%s\n(%d strains)' % (tree_name, roary.shape[1]),),
                    do_show=False,
                    )
         plt.savefig('pangenome_matrix.png')
@@ -159,6 +172,8 @@ def main():
     sns.set_style('white')
 
     tree = Phylo.read(options.tree, 'newick')
+
+    tree_name = get_tree_name(options)
 
     # Max distance to create better plots
     mdist = max([tree.distance(tree.root, x) for x in tree.get_terminals()])
@@ -174,9 +189,11 @@ def main():
     # Sort the matrix according to tip labels in the tree
     roary_sorted = roary_sorted[[x.name for x in tree.get_terminals()]]
 
-    plot_tree_heatmap(mdist, roary, roary_sorted, tree)
+    plot_tree_heatmap(mdist, roary, roary_sorted, tree, tree_name)
 
     make_pie_chart(roary)
+
+
 
 
 if __name__ == "__main__":
