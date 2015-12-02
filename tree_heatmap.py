@@ -33,6 +33,7 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 from Bio import Phylo
+import os
 
 __author__ = "Marco Galardini"
 __version__ = '0.1.0'
@@ -50,6 +51,13 @@ def get_options():
     parser.add_argument('spreadsheet', action='store',
                         help='Roary gene presence/absence spreadsheet',
                         default='gene_presence_absence.csv')
+    parser.add_argument('out_dir', action='store',
+                        help='Output directory for figures',
+                        default=os.getcwd())
+
+    parser.add_argument('nickname', action='store',
+                        help='Nickname for figures',
+                        default='')
 
     parser.add_argument('--version', action='version',
                         version='%(prog)s ' + __version__)
@@ -57,7 +65,7 @@ def get_options():
     return parser.parse_args()
 
 
-def make_freq_plot(roary):
+def make_freq_plot(roary, outprefix):
     # Pangenome frequency plot
     plt.figure(figsize=(7, 5))
     plt.hist(roary.sum(axis=1), roary.shape[1],
@@ -66,11 +74,11 @@ def make_freq_plot(roary):
     plt.ylabel('Number of genes')
     sns.despine(left=True,
                 bottom=True)
-    plt.savefig('pangenome_frequency.png')
+    plt.savefig(outprefix + 'cluster_frequency.png')
     plt.clf()
 
 
-def make_pie_chart(roary):
+def make_pie_chart(roary, outprefix):
     # Plot the pangenome pie chart
     plt.figure(figsize=(10, 10))
     core = roary[(roary.sum(axis=1) >= roary.shape[1] * 0.99) & (
@@ -98,7 +106,7 @@ def make_pie_chart(roary):
                 colors=[(0, 0, 1, float(x) / total) for x in
                         (core, softcore, shell, cloud)],
                 autopct=my_autopct)
-    plt.savefig('pangenome_pie.png')
+    plt.savefig(outprefix + 'pangenome_pie.png')
     plt.clf()
 
 
@@ -127,7 +135,7 @@ def get_tree_name(options):
     return tree_name
 
 
-def plot_tree_heatmap(mdist, roary, roary_sorted, tree, tree_name):
+def plot_tree_heatmap(mdist, roary, roary_sorted, tree, tree_name, outprefix):
 
     # Plot presence/absence matrix against the tree
     with sns.axes_style('whitegrid'):
@@ -162,12 +170,13 @@ def plot_tree_heatmap(mdist, roary, roary_sorted, tree, tree_name):
                    title=('%s\n(%d strains)' % (tree_name, roary.shape[1]),),
                    do_show=False,
                    )
-        plt.savefig('pangenome_matrix.png')
+        plt.savefig(outprefix + 'tree_heatmap.png')
         plt.clf()
 
 
 def main():
     options = get_options()
+    outprefix = options.out_dir + '/' + options.nickname + '_'
 
     sns.set_style('white')
 
@@ -184,14 +193,15 @@ def main():
     idx = roary.sum(axis=1).order(ascending=False).index
     roary_sorted = roary.ix[idx]
 
-    make_freq_plot(roary)
+    make_freq_plot(roary, outprefix)
 
     # Sort the matrix according to tip labels in the tree
     roary_sorted = roary_sorted[[x.name for x in tree.get_terminals()]]
 
-    plot_tree_heatmap(mdist, roary, roary_sorted, tree, tree_name)
+    plot_tree_heatmap(mdist, roary, roary_sorted, tree, tree_name,
+                      outprefix)
 
-    make_pie_chart(roary)
+    make_pie_chart(roary, outprefix)
 
 
 
