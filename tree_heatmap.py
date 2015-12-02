@@ -68,12 +68,12 @@ def get_options():
 def make_freq_plot(roary, outprefix):
     # Pangenome frequency plot
     plt.figure(figsize=(7, 5))
+
     plt.hist(roary.sum(axis=1), roary.shape[1],
              histtype="stepfilled", alpha=.7)
     plt.xlabel('Number of genomes')
     plt.ylabel('Number of genes')
-    sns.despine(left=True,
-                bottom=True)
+
     plt.savefig(outprefix + 'cluster_frequency.png')
     plt.clf()
 
@@ -151,7 +151,6 @@ def plot_tree_heatmap(mdist, roary, roary_sorted, tree, tree_name, outprefix):
         # Creates an outline around the heatmap
         ax1.set_yticks([])
         ax1.set_xticks([])
-        #ax1.axis('off')
 
         # Adjust colspan if strain names overlap heatmap
         ax = plt.subplot2grid((1, 40), (0, 0), colspan=7, axisbg='white')
@@ -202,8 +201,6 @@ def main():
                       outprefix)
 
     make_pie_chart(roary, outprefix)
-
-
 
 
 if __name__ == "__main__":
