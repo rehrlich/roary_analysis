@@ -58,7 +58,7 @@ def make_plots((core, total, new_genes, unique), out_file):
 def make_plots2(data, labels, out_file):
     num_genomes = range(1, len(data[0][0]) + 1)
     num_simulations = len(data[0])
-    num_bins = len(data)
+
     colors = ['m', 'g', 'b', 'r']
 
     with PdfPages(out_file) as pdf:
@@ -81,11 +81,14 @@ def make_plots2(data, labels, out_file):
 # Input is a directoy containing the output from simulate_pan_genome.py
 # Returns a list of the .Rtab files and a list of their cutoffs sorted
 # by cutoffs
-def get_simulated_files(outdir):
+def get_simulated_files(outdir, nickname):
     data = []
     for file1 in os.listdir(outdir):
-        if file1.endswith(".Rtab"):
-            percent = file1.rsplit('_', 1)[1][:-5]
+        split_file = file1.rsplit('_', 1)
+        file_nickname = split_file[0]
+
+        if file1.endswith(".Rtab") and file_nickname == nickname:
+            percent = split_file[1][:-5]
             data.append((percent, file1))
             
     data.sort(key=lambda x: float(x[0]))
@@ -105,7 +108,7 @@ def main():
     data = get_rtab_data(roary_output, roary_files)
     make_plots(data, outdir + '/' + nickname + '_observed_genome_size.pdf')
     
-    sim_files, cutoffs = get_simulated_files(outdir)
+    sim_files, cutoffs = get_simulated_files(outdir, nickname)
 
     data = get_rtab_data(outdir, sim_files)
     plot_file =  outdir + '/' + nickname + '_observed_gene_frequencies.pdf'
