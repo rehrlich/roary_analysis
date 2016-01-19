@@ -73,7 +73,7 @@ GetGeneDataCopies <- function(gene.data.full){
 MakeHeatMaps <- function(gene.counts, prefix){
   gene.counts <- t(gene.counts)
   MakeGenePossHeatMap(gene.counts, prefix)
-  MakeGeneCountsHeatMap(gene.counts, prefix)
+  #MakeGeneCountsHeatMap(gene.counts, prefix)
 }
 
 # inputs are the gene counts matrix, the full roary output data and the output
@@ -115,10 +115,10 @@ main <- function(){
   prefix <- paste(outdir, "/", nickname, "_heatmap_", sep="")
   MakeHeatMaps(gene.data.copies, prefix)
 
-  gene.data.copies.distrib <- FilterCoreGenes(gene.data.copies)
+  #gene.data.copies.distrib <- FilterCoreGenes(gene.data.copies)
 
-  prefix <- paste(outdir, "/", nickname, "_heatmap_no_core_", sep="")
-  MakeHeatMaps(gene.data.copies.distrib, prefix)
+  #prefix <- paste(outdir, "/", nickname, "_heatmap_no_core_", sep="")
+  #MakeHeatMaps(gene.data.copies.distrib, prefix)
 }
 
 main()
